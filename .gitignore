@@ -1,0 +1,7 @@
+*.xlsx
+/data/cache
+/data/task
+/data/img
+/data_process/data
+/logs
+*.json

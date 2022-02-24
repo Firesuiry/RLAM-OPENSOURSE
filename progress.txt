@@ -1,0 +1,3 @@
+top finish/all:0/1
+all finish/all:6/7
+result_evaluate finish/all:0/1

@@ -1,0 +1,7 @@
+#tensorflow-gpu
+gym
+matplotlib
+psutil
+pandas
+
+
