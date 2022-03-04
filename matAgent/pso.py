@@ -22,6 +22,8 @@ class PsoSwarm(MatSwarm):
         self.r1 = np.zeros(n_part)
         self.r2 = np.zeros(n_part)
 
+
+
         self.init()
 
     def init(self):
@@ -71,8 +73,8 @@ class PsoSwarm(MatSwarm):
             self.vs[i] = w * self.vs[i] + c1 * self.r1[i] * (self.p_best[i] - self.xs[i]) + c2 * self.r2[i] * \
                          (self.history_best_x - self.xs[i])
 
-        self.vs[self.vs > self.pos_max] = self.pos_max
-        self.vs[self.vs < self.pos_min] = self.pos_min
+        self.vs[self.vs > self.max_v] = self.max_v
+        self.vs[self.vs < self.min_v] = self.min_v
         self.xs += self.vs
         self.xs[self.xs > self.pos_max] = self.pos_max
         self.xs[self.xs < self.pos_min] = self.pos_min

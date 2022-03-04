@@ -3,6 +3,7 @@ from pathlib import Path
 
 from settings import TASK_PATH
 from task.task_run_utils.common import get_tasks_result, result_process
+from utils.db.db import save_optimizer
 from utils.task_hash import get_task_hash, get_task_hashs
 from log import logger
 import pandas as pd
@@ -87,9 +88,10 @@ def top_task_run(task, mq=None):
         d1 = d.pop('result')
         d['train_average_rank'] = d1[0]['train_average_rank']
         d['origin_average_rank'] = d1[0]['origin_average_rank']
-        d['optimizer'] = d.pop('evaluate_optimizer').__name__
+        d['optimizer'] = d.pop('evaluate_optimizer').optimizer_name
         d['train_result'] = d.pop('train_result')
         xlsx_result.append(d)
+    save_optimizer(xlsx_result)
     df = pd.DataFrame(xlsx_result)
     # print(df)
     writer = pd.ExcelWriter('最终结果.xlsx')

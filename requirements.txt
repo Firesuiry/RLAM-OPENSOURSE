@@ -1,1 +1,4 @@
-fuzzylab
+peewee
+pyit2fls==0.7.9
+pandas
+psutil

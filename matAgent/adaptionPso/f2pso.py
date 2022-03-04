@@ -103,8 +103,8 @@ class FT2PsoSwarm(MatSwarm):
             self.vs[i] = w * self.vs[i] + c1 * self.r1[i] * (self.p_best[i] - self.xs[i]) + c2 * self.r2[i] * \
                          (self.history_best_x - self.xs[i])
 
-        self.vs[self.vs > self.pos_max] = self.pos_max
-        self.vs[self.vs < self.pos_min] = self.pos_min
+        self.vs[self.vs > self.max_v] = self.max_v
+        self.vs[self.vs < self.min_v] = self.min_v
         self.xs += self.vs
         self.xs[self.xs > self.pos_max] = self.pos_max
         self.xs[self.xs < self.pos_min] = self.pos_min
@@ -215,7 +215,7 @@ def get_c1c2(iteration, diversity, error):
     global fuzzy_system, domain
     if fuzzy_system == None:
         init_fuzzy_system()
-    print(iteration, diversity, error)
+    # print(iteration, diversity, error)
     s, c = fuzzy_system.evaluate({"iteration": iteration, "diversity": diversity, "error": error}, min_t_norm,
                                  max_s_norm, domain,
                                  method="Centroid", algorithm="KM")

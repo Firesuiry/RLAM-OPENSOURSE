@@ -41,8 +41,6 @@ class HpsotvacSwarm(MatSwarm):
         self.r1 = np.zeros(n_part)
         self.r2 = np.zeros(n_part)
 
-        self.v_max = pos_max
-        self.v_min = pos_min
         assert pos_max > pos_min
         assert pos_max == -pos_min
 
@@ -62,9 +60,9 @@ class HpsotvacSwarm(MatSwarm):
         self.xs = x
 
     def run_once(self, actions=None):
-        c1 = (C1F - C1I) * (self.step_num + 1) / self.n_run + C1I
-        c2 = (C2F - C2I) * (self.step_num + 1) / self.n_run + C2I
-        w = W_0 + (W_1 - W_0) * (self.step_num + 1) / self.n_run
+        c1 = (C1F - C1I) * self.fe_num / self.fe_max + C1I
+        c2 = (C2F - C2I) * self.fe_num / self.fe_max + C2I
+        w = W_0 + (W_1 - W_0) * self.fe_num / self.fe_max
         gbest_index = np.argmin(self.fits)
 
         new_global_best_fit = self.fits[gbest_index].copy()
@@ -92,8 +90,8 @@ class HpsotvacSwarm(MatSwarm):
             for d in range(self.vs.shape[1]):
                 if self.vs[i, d] == 0:
                     self.vs[i, d] = np.random.uniform(self.v_min, self.v_max)
-        self.vs[self.vs > self.v_max] = self.v_max
-        self.vs[self.vs < self.v_min] = self.v_min
+        self.vs[self.vs > self.max_v] = self.max_v
+        self.vs[self.vs < self.min_v] = self.min_v
 
         self.xs += self.vs
 

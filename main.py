@@ -2,8 +2,10 @@ import os
 import time
 from multiprocessing.dummy import freeze_support
 from display.top_task_result_display import top_task_result_display
-from warnings import simplefilter
-simplefilter('error')
+# from warnings import simplefilter
+# simplefilter('error')
+from task.evaluate_task_generate import generate_evaluate_tasks
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import multiprocessing as mp
 
@@ -51,7 +53,7 @@ def main(processes=1):
     running_tasks = []
     wait_result_tasks = {}
     task_detail = {}
-    need_run_tasks += all_tasks_generate()
+    need_run_tasks += generate_evaluate_tasks()
 
     mq = None
     pool = None

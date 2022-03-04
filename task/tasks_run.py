@@ -15,7 +15,7 @@ from task.utils.evluate_optimizer import evluate_optimizer
 from train.ddpg import get_ddpg_object
 from utils.task_hash import get_task_hash, task2str, get_task_hashs
 from log import logger
-from task.task_run_utils.result_evaluate_task import result_evaluate_task_run
+from task.task_run_utils.result_evaluate_task import result_evaluate_task_run, new_result_evaluate_task_run
 import time
 
 
@@ -23,7 +23,7 @@ def task_run(task, mq=None):  # 用于多进程运行
     task_md5 = get_task_hash(task)
     logger.info(f"运行任务{task_md5}-{task.get('type')}-{task}")
 
-    result = get_task_result(task) if task['type'] not in ['top'] else None
+    result = get_task_result(task) if task['type'] not in ['top', 'new_result_evaluate'] else None
     # result = get_task_result(task)
     try:
         if result:
@@ -43,6 +43,8 @@ def task_run(task, mq=None):  # 用于多进程运行
             return single_evaluate_task_run(task, mq)
         elif task['type'] == 'result_evaluate':
             return result_evaluate_task_run(task, mq)
+        elif task['type'] == 'new_result_evaluate':
+            return new_result_evaluate_task_run(task, mq)
         elif task['type'] == 'top':
             return top_task_run(task, mq)
         else:
