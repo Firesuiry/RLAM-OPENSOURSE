@@ -1,3 +1,0 @@
-new_result_evaluate finish/all:0/1
-evaluate_multi_times finish/all:224/308
-single_evaluate finish/all:840/840
