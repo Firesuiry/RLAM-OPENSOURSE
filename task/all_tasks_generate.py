@@ -9,6 +9,7 @@ from matAgent.pso import PsoSwarm
 from matAgent.shpso import ShpsoSwarm
 from matAgent.hrlepso_base import HrlepsoBaseSwarm
 from matAgent.swarm.gwo import GwoSwarm
+from matAgent.rlepso import RlepsoSwarm
 
 
 def test_all_tasks_generate():
@@ -44,12 +45,13 @@ def test_all_tasks_generate():
 
 def all_tasks_generate():
     # evaluate_optimizers = [GwoSwarm]
-    evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
-                           ]
+    # evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
+    #                        ]
+    evaluate_optimizers = [HrlepsoBaseSwarm]
     base_evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, OlpsoSwarm, PsoSwarm, ShpsoSwarm,
                                 EpsoSwarm, ]  # 都用一样的
-    runtimes = 20
-    separate_trains = [False]
+    runtimes = 10
+    separate_trains = [True, False]
     # groups = [1, 3, 5, 7, 9]
     groups = [5]
     train_max_episode = 400

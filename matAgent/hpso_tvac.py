@@ -59,45 +59,53 @@ class HpsotvacSwarm(MatSwarm):
         assert x.shape == self.xs.shape
         self.xs = x
 
+    def update_best(self):
+        for i in range(self.n_part):
+            # print(self.fits.shape,self.atom_best_fits.shape)
+            if self.fits[i] < self.atom_history_best_fits[i]:
+                self.p_best[i] = self.xs[i].copy()
+                self.atom_history_best_fits[i] = self.fits[i]
+
+            if self.history_best_fit > self.fits[i]:
+                # print(f'update best to {self.fits[self.gbest_index]}')
+                self.history_best_fit = self.fits[i]
+                self.g_best = self.xs[i].copy()
+                self.best_update()
+
     def run_once(self, actions=None):
-        c1 = (C1F - C1I) * self.fe_num / self.fe_max + C1I
-        c2 = (C2F - C2I) * self.fe_num / self.fe_max + C2I
-        w = W_0 + (W_1 - W_0) * self.fe_num / self.fe_max
-        gbest_index = np.argmin(self.fits)
-
-        new_global_best_fit = self.fits[gbest_index].copy()
-        # deta_global = new_global_best_fit - self.last_time_best_fit
-        self.last_time_best_fit = new_global_best_fit
-
-        if self.history_best_fit > self.fits[gbest_index]:
-            self.history_best_fit = self.fits[gbest_index].copy()
-            self.history_best_x = self.xs[gbest_index].copy()
-            self.best_update()
-
-        # print('best fit:{}'.format(self.history_best_fit))
+        temp_c1 = c1 = (C1F - C1I) * self.fe_num / self.fe_max + C1I
+        temp_c2 = c2 = (C2F - C2I) * self.fe_num / self.fe_max + C2I
+        temp_w = w = W_0 + (W_1 - W_0) * self.fe_num / self.fe_max
 
         self.r1 = np.random.uniform(0, 1, (self.n_part, self.n_dim))
         self.r2 = np.random.uniform(0, 1, (self.n_part, self.n_dim))
         for i in range(self.n_part):
             if actions is not None:
-                w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
-                c1 = other_coefficient[0]
-                c2 = other_coefficient[1]
-            self.vs[i] = w * self.vs[i] + c1 * self.r1[i] * (self.p_best[i] - self.xs[i]) + c2 * self.r2[i] * \
-                         (self.history_best_x - self.xs[i])
+                w_coefficient, other_coefficient, mutation_rate = self.get_coefficients(actions, i,
+                                                                                        coefficients_multi=False,
+                                                                                        range_process=False)
+                temp_w = w_coefficient * 0.2 + w
+                temp_c1 = other_coefficient[0] * 0.2 + c1
+                temp_c2 = other_coefficient[1] * 0.2 + c2
+            self.vs[i] = temp_w * self.vs[i] + \
+                         temp_c1 * self.r1[i] * (self.p_best[i] - self.xs[i]) + \
+                         temp_c2 * self.r2[i] * (self.g_best - self.xs[i])
 
         for i in range(self.vs.shape[0]):
             for d in range(self.vs.shape[1]):
                 if self.vs[i, d] == 0:
-                    self.vs[i, d] = np.random.uniform(self.v_min, self.v_max)
+                    self.vs[i, d] = np.random.uniform(self.min_v, self.max_v)
         self.vs[self.vs > self.max_v] = self.max_v
         self.vs[self.vs < self.min_v] = self.min_v
 
         self.xs += self.vs
+        self.xs[self.xs > self.pos_max] = self.pos_max
+        self.xs[self.xs < self.pos_min] = self.pos_min
 
         self.fits = self.fun(self.xs)
+        self.update_best()
 
 
 if __name__ == '__main__':
-    s = HpsotvacSwarm(100, 10, True, fun, 2, 10, -10, config_dic={})
+    s = HpsotvacSwarm(100000, 100, True, fun, 2, 10, -10, config_dic={})
     s.run()

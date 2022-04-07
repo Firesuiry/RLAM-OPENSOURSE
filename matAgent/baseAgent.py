@@ -11,7 +11,7 @@ from train.ddpg import get_ddpg_object
 class MatSwarm:
     optimizer_name = 'base_optimizer'
     action_space = 0
-    obs_space = 3
+    obs_space = 3 * 5
 
     def __init__(self, n_run, n_part, show, fun, n_dim, pos_max, pos_min, config_dic):
         if show:
@@ -37,6 +37,8 @@ class MatSwarm:
 
         self.history_best_x = np.zeros(self.n_dim)
         self.history_best_fit = np.inf
+        self.p_best = np.zeros_like(self.xs)
+        self.atom_history_best_fits = np.zeros(self.n_part) + np.inf
 
         self.fe_num = 0
         if config_dic is None:
@@ -87,6 +89,8 @@ class MatSwarm:
                 if self.ddpg_actor:
                     state = self.get_state()
                     actions = self.ddpg_actor.policy(state).numpy()
+                if self.show:
+                    print('群运行中：{}'.format(self.step_num))
                 self.run_once(actions=actions)
             else:
                 print('fe 超过限制 当前fe:{} 最大fe:{}'.format(self.fe_num, self.fe_max))
@@ -121,13 +125,17 @@ class MatSwarm:
                 self.run_flag = False
             self.fe_num += 1
 
-    def get_coefficients(self, actions, i, coefficients_multi=True):
+    def get_coefficients(self, actions, i, coefficients_multi=True, range_process=True):
         group = int(len(actions) / self.action_space)
         action = actions[i % group * self.action_space:i % group * self.action_space + self.action_space]
         multi_coefficient = action[-1] + 1
         mutation_rate = (action[-2] + 1) * 0.01
-        other_coefficient = action[1:-2] * 1.5 + 1.5
-        w = action[0] * 0.4 + 0.5
+        if range_process:
+            other_coefficient = action[1:-2] * 1.5 + 1.5
+            w = action[0] * 0.4 + 0.5
+        else:
+            other_coefficient = action[1:-2]
+            w = action[0]
         action_sum = np.sum(other_coefficient) + 1e-10
         if action_sum == 0:
             action_sum = 1e-10
@@ -144,13 +152,22 @@ class MatSwarm:
         process = self.fe_num * 2 / self.fe_max - 1
         no_improve_fe = (self.fe_num - self.last_best_update_fe) / self.fe_max
         diversity = np.mean(np.std(self.xs, axis=0))
-        # next_state = [process, no_improve_fe] + list(np.random.random(8) * 2 - 1)
         next_state = [process, no_improve_fe, diversity]
-        return next_state
+
+        return sin_encode(next_state, num=4)
 
     def best_update(self):
         self.last_best_update_fe = self.fe_num
 
+
+def sin_encode(state, num=3):
+    new_state = []
+    for s in state:
+        new_state.append(s)
+        for i in range(num):
+            # new_state.append(np.sin(s * 2 ** i))
+            new_state.append(s * 2 ** i)
+    return np.sin(new_state)
 
 
 def fun(x):

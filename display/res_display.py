@@ -49,7 +49,7 @@ def multi_res_display(ress, orititle='', path='data/img/'):
         # print(swarm_name, orititle)
         # print(res, np.array(res).shape)
         # print(res[0][1])
-        for data in res:
+        for data in res['result']:
             x_data.append(data[0])
             plot_data.append(data[2])
         # min_value = np.min(plot_data) + 10000

@@ -1,9 +1,11 @@
+from matAgent.awpso import AwpsoSwarm
 from matAgent.clpso import ClpsoSwarm
 from matAgent.epso import EpsoSwarm
 from matAgent.fdrpso import FdrpsoSwarm
 from matAgent.hpso_tvac import HpsotvacSwarm
 from matAgent.lips import LipsSwarm
 from matAgent.olpso import OlpsoSwarm
+from matAgent.pppso import PppsoSwarm
 from matAgent.pso import PsoSwarm
 from matAgent.shpso import ShpsoSwarm
 from matAgent.hrlepso_base import HrlepsoBaseSwarm
@@ -12,6 +14,7 @@ from matAgent.swarm.gwo import GwoSwarm
 from matAgent.adaptionPso.f1pso import FT1PsoSwarm
 from matAgent.adaptionPso.f2pso import FT2PsoSwarm
 from matAgent.adaptionPso.success_history_pso import SuccessHistoryPsoSwarm
+from matAgent.adaptionPso.qlpso import QlpsoSwarm
 
 from utils.db.db import get_optimizer_train_result
 
@@ -43,13 +46,16 @@ dim = 30
 runtimes = 10
 max_fe = 1e4
 group = 5
-separate_train = False
+separate_train = True
 n_part = 100
 
 
 def generate_evaluate_tasks():
-    no_train_optimizers = [FT1PsoSwarm, FT2PsoSwarm, SuccessHistoryPsoSwarm, PsoSwarm, HpsotvacSwarm]
-    train_optimizers = [PsoSwarm, ]
+    # no_train_optimizers = [FT1PsoSwarm, FT2PsoSwarm, SuccessHistoryPsoSwarm, QlpsoSwarm]
+    train_optimizers = [HrlepsoBaseSwarm, ]
+
+    no_train_optimizers = [ClpsoSwarm, FdrpsoSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, AwpsoSwarm, PppsoSwarm, EpsoSwarm]
+    # train_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, ]
     optimizer_model_list = []
 
     for no_train_optimizer in no_train_optimizers:

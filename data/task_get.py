@@ -51,6 +51,7 @@ def delete_all_task():
         for d_file in task_file.glob('*'):
             os.remove(d_file)
         task_file.rmdir()
+    os.remove('../db.db')
 
 
 swarms = []
@@ -66,7 +67,7 @@ def delete_swarm_task():
             swarm_name = task_des.get('evaluate_optimizer', '')
             if swarm_name not in swarms:
                 swarms.append(swarm_name)
-            if swarm_name in ['FT1PSO', 'FT2PSO', 'SuccessHistoryPso']:
+            if swarm_name in ['HPSO-TVAC']:
                 print(F'{i} delete', task_file)
                 i += 1
                 for d_file in task_file.glob('*'):
@@ -77,5 +78,7 @@ def delete_swarm_task():
 
 if __name__ == '__main__':
     # task_des, task_result = get_task_by_type('top')
+    # delete_all_task()
     delete_swarm_task()
+    delete_not_single_evaluate_task()
     a = 1

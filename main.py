@@ -47,6 +47,8 @@ def print_task_progress():
 
 
 def main(processes=1):
+    if processes > mp.cpu_count():
+        processes = mp.cpu_count()
     logger.info(f'main run at {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}')
     logger.info(f'processes:{processes}')
     need_run_tasks = []
@@ -54,6 +56,7 @@ def main(processes=1):
     wait_result_tasks = {}
     task_detail = {}
     need_run_tasks += generate_evaluate_tasks()
+    # need_run_tasks += all_tasks_generate()
 
     mq = None
     pool = None
@@ -130,6 +133,6 @@ if __name__ == '__main__':
     freeze_support()
     res = 'restart'
     while res == 'restart':
-        res = main(8)
+        res = main(30)
         logger.info(f'main run finish res:{res}')
         time.sleep(60)

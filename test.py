@@ -1,8 +1,11 @@
+import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 import h5py
 from pathlib import Path
+
+from matAgent.baseAgent import sin_encode
 
 
 def print_keras_wegiths(weight_file_path):
@@ -41,8 +44,8 @@ def plot(model, jinddu=10, title=None):
     for i in range(jinddu):
         # x.append(i)
         # res = model.predict([(i, 0)])
-        x.append(i/jinddu)
-        res = model.predict([(i/jinddu, 0)])
+        x.append(i / jinddu)
+        res = model.predict([(i / jinddu, 0)])
         y1.append(res[0][0])
         y2.append(res[0][1])
         y3.append(res[0][2])
@@ -56,7 +59,7 @@ def plot(model, jinddu=10, title=None):
     # plt.show()
 
 
-if __name__ == '__main__':
+def task_print():
     model_fn = 'data/task/ac109973e3f51718a313ed9ba2cfa9eb/ddpg_actor_episode50_round0.h5'
     tasks = ['bbead8669f29fbc42c75d2487a3009d7', ]
     # model = tf.keras.models.load_model(model_fn)
@@ -73,3 +76,110 @@ if __name__ == '__main__':
             plot(model, jinddu=30, title=f'{file.name}')
             # if i > 5:
             #     break
+
+
+def show_model():
+    model_fn = r'D:\paper\rlma\model\0406单层sin\ddpg_actor_episode120_round0.h5'
+    model = tf.keras.models.load_model(str(model_fn), custom_objects={'leaky_relu': tf.nn.leaky_relu})
+
+    # process = self.fe_num * 2 / self.fe_max - 1
+    # no_improve_fe = (self.fe_num - self.last_best_update_fe) / self.fe_max
+    # diversity = np.mean(np.std(self.xs, axis=0))
+
+    # 进度关系图
+    xs = []
+    ws = []
+    c1s = []
+    c2s = []
+    for i in range(100):
+        process = i / 50 - 1
+        no_improve_fe = 0
+        diversity = 0
+        state = np.array(get_state(process, no_improve_fe, diversity))
+        # print(state)
+        actions = model.predict(state)
+        w, other_coefficient, mutation_rate = get_coefficients(actions[0])
+        c1 = other_coefficient[0]
+        c2 = other_coefficient[1]
+        xs.append(i / 100)
+        ws.append(w)
+        c1s.append(c1)
+        c2s.append(c2)
+    plt.plot(xs, ws, xs, c1s, xs, c2s)
+    plt.title(f'process')
+    plt.savefig(f'data/img/process.png')
+    plt.clf()
+
+    # 未增长关系图
+    xs = []
+    ws = []
+    c1s = []
+    c2s = []
+    for i in range(100):
+        process = 0
+        no_improve_fe = i / 100
+        diversity = 0
+        state = np.array(get_state(process, no_improve_fe, diversity))
+        actions = model.predict([state])
+        w, other_coefficient, mutation_rate = get_coefficients(actions[0])
+        c1 = other_coefficient[0]
+        c2 = other_coefficient[1]
+        xs.append(i / 100)
+        ws.append(w)
+        c1s.append(c1)
+        c2s.append(c2)
+    plt.plot(xs, ws, xs, c1s, xs, c2s)
+    plt.title(f'no_improve_fe')
+    plt.savefig(f'data/img/no_improve_fe.png')
+    plt.clf()
+
+    # 进度关系图
+    xs = []
+    ws = []
+    c1s = []
+    c2s = []
+    for i in range(100):
+        process = 0
+        no_improve_fe = 0
+        diversity = i / 100
+        state = np.array(get_state(process, no_improve_fe, diversity))
+        actions = model.predict([state])
+        w, other_coefficient, mutation_rate = get_coefficients(actions[0])
+        c1 = other_coefficient[0]
+        c2 = other_coefficient[1]
+        xs.append(i / 100)
+        ws.append(w)
+        c1s.append(c1)
+        c2s.append(c2)
+    plt.plot(xs, ws, xs, c1s, xs, c2s)
+    plt.title(f'diversity')
+    plt.savefig(f'data/img/diversity.png')
+    plt.clf()
+
+
+def get_coefficients(actions, coefficients_multi=True, range_process=True):
+    action = actions[0:5]
+    multi_coefficient = action[-1] + 1
+    mutation_rate = (action[-2] + 1) * 0.01
+    if range_process:
+        other_coefficient = action[1:-2] * 1.5 + 1.5
+        w = action[0] * 0.4 + 0.5
+    else:
+        other_coefficient = action[1:-2]
+        w = action[0]
+    action_sum = np.sum(other_coefficient) + 1e-10
+    if action_sum == 0:
+        action_sum = 1e-10
+    if coefficients_multi:
+        other_coefficient = other_coefficient / action_sum * multi_coefficient * 4
+    return w, other_coefficient, mutation_rate
+
+
+def get_state(process, no_improve_fe, diversity):
+    next_state = [process, no_improve_fe, diversity]
+    return [sin_encode(next_state, num=4)]
+
+
+if __name__ == '__main__':
+    # task_print()
+    show_model()

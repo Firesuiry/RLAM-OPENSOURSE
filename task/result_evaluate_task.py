@@ -23,7 +23,7 @@ def visible_res_generate(results: dict, path=BASE_PATH + '/data/result/'):
         benchmark = fun
         best_caches = []
         for optimizer, res in optimizer_ress.items():
-            caches[benchmark][optimizer] = {'best': res['result'][-1][2]}
+            caches[benchmark][optimizer] = {'best': res['result'][-1][2], 'result': res['result']}
             best_caches.append(res['result'][-1][2])
         for optimizer, res in optimizer_ress.items():
             index = 0
@@ -32,8 +32,8 @@ def visible_res_generate(results: dict, path=BASE_PATH + '/data/result/'):
                     index += 1
             caches[benchmark][optimizer]['rank'] = index
 
-    # for benchmark, ress in caches.items():
-    #     multi_res_display(ress, benchmark)
+    for benchmark, ress in caches.items():
+        multi_res_display(ress, benchmark)
 
     book = xlwt.Workbook(encoding="utf-8", style_compression=0)
     sheet = book.add_sheet('test01', cell_overwrite_ok=True)
