@@ -27,7 +27,25 @@ def actor(state_shape, action_dim, action_bound, action_shift, units=(400, 300))
         # x = Dense(units[index], name="L{}".format(index), activation='relu')(x)
         x = Dense(units[index], name="L{}".format(index), activation=tf.nn.leaky_relu)(x)
     # unscaled_output = Dense(action_dim, name="Out", activation='tanh')(x)
-    unscaled_output = Dense(action_dim, name="Out", activation=tf.nn.tanh)(x)
+    unscaled_output = Dense(action_dim, name="Out", activation=tf.nn.tanh)(x * 1)
+    scalar = action_bound * np.ones(action_dim)
+    output = Lambda(lambda op: op * scalar)(unscaled_output)
+    if np.sum(action_shift) != 0:
+        output = Lambda(lambda op: op + action_shift)(output)  # for action range not centered at zero
+
+    model = Model(inputs=state, outputs=output)
+    # print(model.summary())
+    return model
+
+def liner_actor(state_shape, action_dim, action_bound, action_shift, units=(400, 300)):
+    state = Input(shape=state_shape)
+    # x = Dense(units[0], name="L0", activation='relu')(state)
+    x = Dense(units[0], name="L0")(state)
+    for index in range(1, len(units)):
+        # x = Dense(units[index], name="L{}".format(index), activation='relu')(x)
+        x = Dense(units[index], name="L{}".format(index))(x)
+    # unscaled_output = Dense(action_dim, name="Out", activation='tanh')(x)
+    unscaled_output = Dense(action_dim, name="Out")(x)
     scalar = action_bound * np.ones(action_dim)
     output = Lambda(lambda op: op * scalar)(unscaled_output)
     if np.sum(action_shift) != 0:
@@ -152,7 +170,7 @@ class DDPG:
 
     def save_model(self, a_fn, c_fn):
         self.actor.save(a_fn)
-        self.critic.save(c_fn)
+        # self.critic.save(c_fn)
 
     def load_actor(self, a_fn):
         self.actor.load_weights(a_fn)
@@ -241,13 +259,13 @@ class DDPG:
 
                 if steps >= max_steps:
                     print("episode {}, reached max steps".format(episode))
-                    self.save_model(task_path.joinpath(f"ddpg_actor_episode{episode}_round{train_num}.h5"),
-                                    task_path.joinpath(f"ddpg_critic_episode{episode}_round{train_num}.h5"))
+                    self.save_model(task_path.joinpath(f"ddpg_actor_round{train_num}_episode{episode}.h5"),
+                                    task_path.joinpath(f"ddpg_critic_round{train_num}_episode{episode}.h5"))
 
                 done, cur_state, steps, total_reward = False, self.env.reset(), 0, 0
                 if episode % save_freq == 0:
-                    self.save_model(task_path.joinpath(f"ddpg_actor_episode{episode}_round{train_num}.h5"),
-                                    task_path.joinpath(f"ddpg_critic_episode{episode}_round{train_num}.h5"))
+                    self.save_model(task_path.joinpath(f"ddpg_actor_round{train_num}_episode{episode}.h5"),
+                                    task_path.joinpath(f"ddpg_critic_round{train_num}_episode{episode}.h5"))
 
             a = self.act(cur_state)  # model determine action given state
             action = np.argmax(a) if self.discrete else a[0]  # post process for discrete action space
@@ -274,8 +292,8 @@ class DDPG:
             #
             # summary_writer.flush()
 
-        self.save_model(task_path.joinpath(f"ddpg_actor_final_round{train_num}.h5"),
-                        task_path.joinpath(f"ddpg_critic_final_round{train_num}.h5"))
+        self.save_model(task_path.joinpath(f"ddpg_actor_round{train_num}_final.h5"),
+                        task_path.joinpath(f"ddpg_critic_round{train_num}_final.h5"))
 
     def policy(self, state):
         a = self.act(state, add_noise=False)

@@ -44,20 +44,21 @@ def test_all_tasks_generate():
 
 
 def all_tasks_generate():
-    # evaluate_optimizers = [GwoSwarm]
+    evaluate_optimizers = [PsoSwarm]
     # evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
     #                        ]
-    evaluate_optimizers = [HrlepsoBaseSwarm]
+    # evaluate_optimizers = [HrlepsoBaseSwarm]
     base_evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, OlpsoSwarm, PsoSwarm, ShpsoSwarm,
                                 EpsoSwarm, ]  # 都用一样的
     runtimes = 10
-    separate_trains = [True, False]
+    separate_trains = [False]
     # groups = [1, 3, 5, 7, 9]
     groups = [5]
-    train_max_episode = 400
+    train_max_episode = 600
     train_max_steps = train_max_episode * 100
     dims = [30]
     evaluate_function = list(range(1, 29, 1))
+    train_times = 30
 
     task = {'type': 'top',
             'evaluate_optimizers': evaluate_optimizers,
@@ -69,9 +70,9 @@ def all_tasks_generate():
             'train_max_episode': train_max_episode,
             'train_max_steps': train_max_steps,
             'dims': dims,
-            'train_times': 1,
-            'lr_critic': 1e-4,
-            'lr_actor': 1e-6,
+            'train_times': train_times,
+            'lr_critic': 1e-3,
+            'lr_actor': 1e-5,
             }
 
     return [task]

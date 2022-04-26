@@ -1,3 +1,5 @@
+import numpy as np
+
 from matAgent.baseAgent import *
 
 # LIPS
@@ -110,6 +112,12 @@ class LipsSwarm(MatSwarm):
         plt.xlim(self.pos_min, self.pos_max)
         plt.ylim(self.pos_min, self.pos_max)
         plt.pause(0.05)
+
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = np.nan
+        c2 = np.nan
+        return w, c1, c2
 
 
 def fun2(x):

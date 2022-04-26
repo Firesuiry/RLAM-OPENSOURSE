@@ -11,7 +11,7 @@ from train.ddpg import get_ddpg_object
 class MatSwarm:
     optimizer_name = 'base_optimizer'
     action_space = 0
-    obs_space = 3 * 5
+    obs_space = 3 * 4 * 2
 
     def __init__(self, n_run, n_part, show, fun, n_dim, pos_max, pos_min, config_dic):
         if show:
@@ -57,7 +57,7 @@ class MatSwarm:
             self.optimizer_name = self.name
 
             gym_env = NormalEnv(show=False, obs_shape=(self.obs_space,),
-                                action_shape=(self.action_space * self.n_group,))
+                                action_shape=(self.action_space * self.n_group,), n_dim=self.n_dim,)
             ddpg = get_ddpg_object(gym_env, )
             ddpg.load_actor(str(model))
             self.ddpg_actor = ddpg
@@ -133,14 +133,15 @@ class MatSwarm:
         if range_process:
             other_coefficient = action[1:-2] * 1.5 + 1.5
             w = action[0] * 0.4 + 0.5
+            # w = action[0] * 10 + 0.5
         else:
             other_coefficient = action[1:-2]
             w = action[0]
         action_sum = np.sum(other_coefficient) + 1e-10
         if action_sum == 0:
             action_sum = 1e-10
-        if coefficients_multi:
-            other_coefficient = other_coefficient / action_sum * multi_coefficient * 4
+        # if coefficients_multi:
+        #     other_coefficient = other_coefficient / action_sum * multi_coefficient * 4
         return w, other_coefficient, mutation_rate
 
     def get_group_coefficients(self, actions, i):
@@ -159,15 +160,31 @@ class MatSwarm:
     def best_update(self):
         self.last_best_update_fe = self.fe_num
 
+    def get_average_coefficients(self, actions):
+        ws = []
+        c1s = []
+        c2s = []
+        for i in range(self.n_group):
+            w, c1, c2 = self.get_w_c1_c2(actions, i)
+            ws.append(w)
+            c1s.append(c1)
+            c2s.append(c2)
+        return np.mean(ws), np.mean(c1s) / 2.5, np.mean(c2s) / 2.5, self.fe_num / self.fe_max
+
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = other_coefficient[0]
+        c2 = other_coefficient[1]
+        return w, c1, c2
+
 
 def sin_encode(state, num=3):
     new_state = []
     for s in state:
-        new_state.append(s)
         for i in range(num):
-            # new_state.append(np.sin(s * 2 ** i))
+            new_state.append(np.sin(s * 2 ** i))
             new_state.append(s * 2 ** i)
-    return np.sin(new_state)
+    return np.array(new_state)
 
 
 def fun(x):

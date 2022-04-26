@@ -39,7 +39,7 @@ class function_wrapper:
 
 
 class NormalEnv(Env):
-    def __init__(self, obs_shape=(1,), action_shape=(50,), action_low=-1, action_high=1, show=False,
+    def __init__(self, n_dim, obs_shape=(1,), action_shape=(50,), action_low=-1, action_high=1, show=False,
                  target_optimizer=None, fun_nums=None, n_part=100, max_fe=1e4):
         super().__init__(obs_shape=obs_shape, action_shape=action_shape, action_low=action_low, action_high=action_high)
         self.target_optimizer = target_optimizer
@@ -55,21 +55,20 @@ class NormalEnv(Env):
         self.run_time = 0
         self.n_part = n_part
         self.max_fe = max_fe
+        self.n_dim = n_dim
 
     def reset(self):
         """
 
         :return: next_state
         """
-        n_dim = 50
-        self.n_run = n_run = 1000
-        n_part = 40
+        self.n_run = n_run = 10000
         show = self.show_flag
 
         self.fun_num = random.choice(self.fun_nums)
 
-        fun_class = function_wrapper(50, self.fun_num)
-        self.optimizer = self.target_optimizer(n_run, self.n_part, show, fun_class.fun, n_dim, 100, -100,
+        fun_class = function_wrapper(self.n_dim, self.fun_num)
+        self.optimizer = self.target_optimizer(n_run, self.n_part, show, fun_class.fun, self.n_dim, 100, -100,
                                                {'max_fes': self.max_fe})
 
         self.fit_value = [0., 0., 0., 0., 0.]
@@ -108,6 +107,7 @@ class NormalEnv(Env):
         if self.optimizer.show:
             self.optimizer.show_method()
 
+        w, c1, c2, process = self.optimizer.get_average_coefficients(action)
         self.optimizer.run_once(action)
 
         # if self.pso_swarm.best_fit < self.fun.finish or self.step_num >= self.n_run:
@@ -138,10 +138,26 @@ class NormalEnv(Env):
         # print(f'state:{next_state}\naction:{action[:10]}\nmean:{np.mean(action)},std:{np.std(action)}')
 
         if deta_best < 0:
-            # reward = sqrt(deta_best, 3)
             reward = 1
         else:
             reward = -1
+
+        # if not np.isnan(w):
+        #     reward += ((1 - 2 * process) * (w - 0.5)) * 2
+        # if not np.isnan(c1):
+        #     reward += -((1 - 2 * process) * (c1 - 0.5)) * 1
+        # if not np.isnan(c2):
+        #     reward += ((1 - 2 * process) * (c2 - 0.5)) * 1
+
+        # target_w = (1 - process) * 0.8 + 0.1
+        # target_c1 = process * 0.8 + 0.2
+        # target_c2 = (1 - process) * 0.8 + 0.2
+        # if not np.isnan(w):
+        #     reward += -np.abs(w - target_w) * 1
+        # if not np.isnan(c1):
+        #     reward += -np.abs(c1 - target_c1) * 0.5
+        # if not np.isnan(c2):
+        #     reward += -np.abs(c2 - target_c2) * 0.5
 
         if np.isnan(reward):
             print(deta_best)
@@ -150,8 +166,14 @@ class NormalEnv(Env):
         if init:
             reward = 0
         if self.show_flag:
-            print('action:{} next_state:{} reward:{} done:{} best:{}'.format(action, next_state, reward, done,
-                                                                             self.optimizer.history_best_fit))
+            # print('action:{} next_state:{} reward:{} done:{} best:{}'.format(action, next_state, reward, done,
+            #                                                                  self.optimizer.history_best_fit))
+            print(
+                ' process:{:<10.5} improve:{:<10.5} w:{:<10.5} c1:{:<10.5} c2:{:<10.5} reward:{:<10.5}'.format(process,
+                                                                                                               deta_best,
+                                                                                                               w, c1,
+                                                                                                               c2,
+                                                                                                               reward))
 
         if done:
             res = f'迭代次数：{self.step_num},测试函数:{self.fun_num}，函数目标值：{self.min_value} 函数fe：{self.optimizer.fe_num},运行结果：{self.optimizer.history_best_fit}'

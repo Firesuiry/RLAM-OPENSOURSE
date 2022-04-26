@@ -55,8 +55,8 @@ def main(processes=1):
     running_tasks = []
     wait_result_tasks = {}
     task_detail = {}
-    need_run_tasks += generate_evaluate_tasks()
-    # need_run_tasks += all_tasks_generate()
+    # need_run_tasks += generate_evaluate_tasks()
+    need_run_tasks += all_tasks_generate()
 
     mq = None
     pool = None
@@ -134,5 +134,6 @@ if __name__ == '__main__':
     res = 'restart'
     while res == 'restart':
         res = main(30)
+        # res = main(1)
         logger.info(f'main run finish res:{res}')
         time.sleep(60)

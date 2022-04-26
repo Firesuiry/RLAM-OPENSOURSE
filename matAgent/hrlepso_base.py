@@ -297,6 +297,12 @@ class HrlepsoBaseSwarm(MatSwarm):
         plt.ylim(self.pos_min, self.pos_max)
         plt.pause(0.05)
 
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = other_coefficient[1]
+        c2 = other_coefficient[2]
+        return w, c1, c2
+
     # def get_state(self):
     #
     #     # mean_fit = np.mean(self.fits)

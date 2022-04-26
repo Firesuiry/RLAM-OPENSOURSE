@@ -9,6 +9,7 @@ from env.NormalEnv import NormalEnv
 from rl.DDPG.TF2_DDPG_Basic import DDPG
 from settings import *
 from task.task_run_utils.common import get_task_result, result_process, get_tasks_result
+from task.task_run_utils.single_round_train import single_round_train_task_run
 from task.task_run_utils.top_task_run import top_task_run
 from task.utils.all_task_final_result_process.all_task_final_result_process import all_task_final_result_process
 from task.utils.evluate_optimizer import evluate_optimizer
@@ -47,6 +48,8 @@ def task_run(task, mq=None):  # 用于多进程运行
             return new_result_evaluate_task_run(task, mq)
         elif task['type'] == 'top':
             return top_task_run(task, mq)
+        elif task['type'] == 'single_round_train':
+            single_round_train_task_run(task, mq)
         else:
             raise ValueError(f"{task['type']} 未定义")
     except Exception as e:
@@ -281,27 +284,27 @@ def single_train_task_run(task, mq=None):
     lr_critic = task.get('lr_critic', 1e-7)
     lr_actor = task.get('lr_actor', 1e-9)
     # 训练过程
-    gym_env = NormalEnv(obs_shape=(optimizer.obs_space,), action_shape=(optimizer.action_space * group,),
-                        target_optimizer=optimizer, fun_nums=fun_nums, max_fe=max_fe, n_part=n_part)
-
-    assert (gym_env.action_space.high == -gym_env.action_space.low)
-    is_discrete = False
-    task_md5 = get_task_hash(task)
-    task_dir = TASK_PATH.joinpath(f'{task_md5}/')
+    tasks = []
     for i in range(task['train_num']):
-        if os.path.exists(task_dir.joinpath(f"ddpg_actor_final_round{i}.h5")):
-            continue
-        ddpg = get_ddpg_object(gym_env, discrete=is_discrete, memory_cap=10000000, lr_critic=lr_critic,
-                               lr_actor=lr_actor)
-        save_freq = train_max_episode / 20
-        if save_freq < 1:
-            save_freq = 1
-        save_freq = int(save_freq)
-        ddpg.train(max_episodes=train_max_episode, max_epochs=train_max_steps, task_path=task_dir, train_num=i,
-                   save_freq=save_freq)
+        new_task = copy.deepcopy(task)
+        new_task['type'] = 'single_round_train'
+        new_task['round'] = i
+        tasks.append(new_task)
+    results = get_tasks_result(tasks)
+    # 如无结果则等待结果
+    if results is None:
+        task_result = {
+            'result': None,
+            'md5': get_task_hash(task),
+            'needs': tasks
+        }
+        return result_process(task, task_result, write=False, mq=mq)
+
+    all_models = []
+    for result in results:
+        all_models += result['result']
 
     # 评估过程
-    all_models = task_dir.glob('ddpg_actor*.h5')
     new_task = {
         'type': 'evaluate_models',
         'evaluate_optimizers': [

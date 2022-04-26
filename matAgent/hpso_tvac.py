@@ -105,6 +105,15 @@ class HpsotvacSwarm(MatSwarm):
         self.fits = self.fun(self.xs)
         self.update_best()
 
+    def get_w_c1_c2(self, actions, i):
+        w_coefficient, other_coefficient, mutation_rate = self.get_coefficients(actions, i,
+                                                                                coefficients_multi=False,
+                                                                                range_process=False)
+        w = w_coefficient * 0.2 + W_0 + (W_1 - W_0) * self.fe_num / self.fe_max
+        c1 = other_coefficient[0] * 0.2 + (C1F - C1I) * self.fe_num / self.fe_max + C1I
+        c2 = other_coefficient[1] * 0.2 + (C2F - C2I) * self.fe_num / self.fe_max + C2I
+        return w, c1, c2
+
 
 if __name__ == '__main__':
     s = HpsotvacSwarm(100000, 100, True, fun, 2, 10, -10, config_dic={})

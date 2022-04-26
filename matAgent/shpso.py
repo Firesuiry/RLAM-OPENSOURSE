@@ -113,6 +113,12 @@ class ShpsoSwarm(MatSwarm):
 
         self.fits = self.fun(self.xs)
 
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = np.nan
+        c2 = np.nan
+        return w, c1, c2
+
 
 if __name__ == '__main__':
     s = ShpsoSwarm(100, 10, True, fun, 2, 10, -10, None)

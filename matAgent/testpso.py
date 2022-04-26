@@ -322,6 +322,12 @@ class TestpsoSwarm(MatSwarm):
         return next_state
         # return np.array([self.fe_num / self.fe_max])
 
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = other_coefficient[1]
+        c2 = other_coefficient[2]
+        return w, c1, c2
+
 
 def fun2(x):
     x2 = np.power(x - 50, 2)

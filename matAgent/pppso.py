@@ -128,6 +128,12 @@ class PppsoSwarm(MatSwarm):
         plt.ylim(self.pos_min, self.pos_max)
         plt.pause(0.05)
 
+    def get_w_c1_c2(self, actions, i):
+        w, other_coefficient, mutation_rate = self.get_coefficients(actions, i)
+        c1 = other_coefficient[0] * w
+        c2 = other_coefficient[1] * w
+        return w, c1, c2
+
 
 if __name__ == '__main__':
     s = PppsoSwarm(100, 40, True, fun, 10, 1000, -1000, {})
