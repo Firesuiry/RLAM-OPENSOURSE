@@ -263,7 +263,7 @@ class DDPG:
                                     task_path.joinpath(f"ddpg_critic_round{train_num}_episode{episode}.h5"))
 
                 done, cur_state, steps, total_reward = False, self.env.reset(), 0, 0
-                if episode % save_freq == 0:
+                if episode % save_freq == 0 or episode < 2:
                     self.save_model(task_path.joinpath(f"ddpg_actor_round{train_num}_episode{episode}.h5"),
                                     task_path.joinpath(f"ddpg_critic_round{train_num}_episode{episode}.h5"))
 

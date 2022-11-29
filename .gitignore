@@ -9,3 +9,8 @@
 *.db
 progress.txt
 error.txt
+!/data/cec2013
+/data
+/rl/logs
+/.ipynb_checkpoints
+.idea

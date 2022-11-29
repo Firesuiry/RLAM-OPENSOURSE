@@ -9,7 +9,7 @@ C1 = 2.05
 C2 = 2.05
 K1 = 0.5
 K2 = 0.1
-
+# A novel particle swarm optimization based on prey–predator relationship
 
 class PppsoSwarm(MatSwarm):
     optimizer_name = 'PPPSO'

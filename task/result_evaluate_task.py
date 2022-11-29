@@ -1,3 +1,4 @@
+import copy
 import os
 from pathlib import Path
 import json
@@ -73,3 +74,9 @@ def visible_res_generate(results: dict, path=BASE_PATH + '/data/result/'):
         i += 1
         name = './data/data{}.xls'.format(i)
     book.save(name)
+    json_result = copy.deepcopy(results)
+    for fun, optimizer_ress in json_result.items():
+        for optimizer, res in optimizer_ress.items():
+            json_result[fun][optimizer] = res['result'].tolist()
+    print(json_result)
+    json.dump(json_result, open('./data/data{}.json'.format(i), 'w'))

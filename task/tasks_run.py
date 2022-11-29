@@ -336,8 +336,9 @@ def single_train_task_run(task, mq=None):
         }
         return result_process(task, task_result, write=False, mq=mq)
 
-    real_results = results[0]['result'][:3]
-    new_models = [real_result['model'] for real_result in real_results]
+    # real_results = results[0]['result'][:3]
+    # new_models = [real_result['model'] for real_result in real_results]
+    new_models = results[0]['result'][:3]
 
     task_result2 = copy.deepcopy(task)
     task_result2['result'] = new_models
@@ -401,11 +402,43 @@ def evaluate_models_task_run(task, mq=None):
         return result_process(task, task_result, write=False, mq=mq)
 
     # 如有结果则组织最终结果
-    results.sort(key=lambda result: result['result'][-1][2])
+    # results.sort(key=lambda result: result['result'][-1][2])
+    # todo: 对结果进行排序
+    fun_results = {}
+    result_dict = {}
+    for evaluate_function in task['evaluate_functions']:
+        fun_results[evaluate_function] = []
+    model_rank_results = {}
+    model_average_results = {}
+    models = []
+    i = 0
+    for result in results:
+        evaluate_function = result['evaluate_function']
+        model = result['model']
+        if model not in models:
+            models.append(model)
+            model_rank_results[model] = []
+            model_average_results[model] = []
+        fun_results[evaluate_function].append(i)
+        result_dict[i] = result
+        i += 1
+    for evaluate_function in task['evaluate_functions']:
+        optimizer_best_results = []
+        for index in fun_results[evaluate_function]:
+            optimizer_best_results.append(result_dict[index]['result'][-1][2])
+        optimizer_best_results = np.array(optimizer_best_results)
+        for index in fun_results[evaluate_function]:
+            rank = np.sum(result_dict[index]['result'][-1][2] > optimizer_best_results) + 1
+            model_rank_results[result_dict[index]['model']].append(rank)
+    for k, v in model_rank_results.items():
+        model_average_results[k] = np.mean(v)
+
+    models.sort(key=lambda m: model_average_results[m])
 
     task_result = copy.deepcopy(task)
-    task_result['result'] = results
+    task_result['result'] = models
     task_result['md5'] = get_task_hash(task)
+
 
     return result_process(task, task_result, mq)
 

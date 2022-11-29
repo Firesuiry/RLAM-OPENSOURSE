@@ -13,14 +13,17 @@ from matAgent.rlepso import RlepsoSwarm
 
 
 def test_all_tasks_generate():
-    evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
-                           GwoSwarm]
-    base_evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, OlpsoSwarm, PsoSwarm, ShpsoSwarm,
-                                EpsoSwarm, GwoSwarm]  # 都用一样的
+    # evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
+    #                        GwoSwarm]
+    # base_evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, OlpsoSwarm, PsoSwarm, ShpsoSwarm,
+    #                             EpsoSwarm, GwoSwarm]  # 都用一样的
+
+    evaluate_optimizers = [PsoSwarm]
+    base_evaluate_optimizers = [HpsotvacSwarm]  # 都用一样的
     runtimes = 1
     separate_trains = [False]
     groups = [5, ]
-    train_max_episode = 2
+    train_max_episode = 1
     train_max_steps = 100 * train_max_episode
     dims = [20, ]
     evaluate_function = list(range(1, 2, 1))
@@ -35,7 +38,7 @@ def test_all_tasks_generate():
             'train_max_episode': train_max_episode,
             'train_max_steps': train_max_steps,
             'dims': dims,
-            'train_times': 1,
+            'train_times': 2,
             'lr_critic': 1e-4,
             'lr_actor': 1e-6,
             }
@@ -44,21 +47,21 @@ def test_all_tasks_generate():
 
 
 def all_tasks_generate():
-    evaluate_optimizers = [PsoSwarm]
+    evaluate_optimizers = [PsoSwarm,HpsotvacSwarm]
     # evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, HrlepsoBaseSwarm,
     #                        ]
     # evaluate_optimizers = [HrlepsoBaseSwarm]
     base_evaluate_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, OlpsoSwarm, PsoSwarm, ShpsoSwarm,
                                 EpsoSwarm, ]  # 都用一样的
     runtimes = 10
-    separate_trains = [False]
+    separate_trains = [False, True]
     # groups = [1, 3, 5, 7, 9]
     groups = [5]
     train_max_episode = 600
     train_max_steps = train_max_episode * 100
     dims = [30]
     evaluate_function = list(range(1, 29, 1))
-    train_times = 30
+    train_times = 1
 
     task = {'type': 'top',
             'evaluate_optimizers': evaluate_optimizers,
@@ -71,8 +74,8 @@ def all_tasks_generate():
             'train_max_steps': train_max_steps,
             'dims': dims,
             'train_times': train_times,
-            'lr_critic': 1e-3,
-            'lr_actor': 1e-5,
+            'lr_critic': 1e-4,
+            'lr_actor': 1e-6,
             }
 
     return [task]

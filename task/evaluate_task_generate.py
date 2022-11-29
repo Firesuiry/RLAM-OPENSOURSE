@@ -51,10 +51,10 @@ n_part = 100
 
 
 def generate_evaluate_tasks():
-    # no_train_optimizers = [FT1PsoSwarm, FT2PsoSwarm, SuccessHistoryPsoSwarm, QlpsoSwarm]
-    train_optimizers = [HrlepsoBaseSwarm, ]
+    no_train_optimizers = [FT1PsoSwarm, FT2PsoSwarm, SuccessHistoryPsoSwarm, QlpsoSwarm]
+    train_optimizers = [PsoSwarm, ]
 
-    no_train_optimizers = [ClpsoSwarm, FdrpsoSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, AwpsoSwarm, PppsoSwarm, EpsoSwarm]
+    # no_train_optimizers = [ClpsoSwarm, FdrpsoSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, AwpsoSwarm, PppsoSwarm, EpsoSwarm]
     # train_optimizers = [ClpsoSwarm, FdrpsoSwarm, HpsotvacSwarm, LipsSwarm, PsoSwarm, ShpsoSwarm, ]
     optimizer_model_list = []
 

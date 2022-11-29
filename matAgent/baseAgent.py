@@ -57,8 +57,9 @@ class MatSwarm:
             self.optimizer_name = self.name
 
             gym_env = NormalEnv(show=False, obs_shape=(self.obs_space,),
-                                action_shape=(self.action_space * self.n_group,), n_dim=self.n_dim,)
+                                action_shape=(self.action_space * self.n_group,), n_dim=self.n_dim, )
             ddpg = get_ddpg_object(gym_env, )
+            # print(ddpg.actor.summary())
             ddpg.load_actor(str(model))
             self.ddpg_actor = ddpg
 
@@ -152,7 +153,10 @@ class MatSwarm:
     def get_state(self):
         process = self.fe_num * 2 / self.fe_max - 1
         no_improve_fe = (self.fe_num - self.last_best_update_fe) / self.fe_max
-        diversity = np.mean(np.std(self.xs, axis=0))
+        if hasattr(self, 'diversity'):
+            diversity = self.diversity
+        else:
+            diversity = np.mean(np.std(self.xs, axis=0))
         next_state = [process, no_improve_fe, diversity]
 
         return sin_encode(next_state, num=4)
