@@ -1,0 +1,16 @@
+*.xlsx
+/data/cache
+/data/task
+/data/img
+/data_process/data
+/logs
+*.json
+*.xls
+*.db
+progress.txt
+error.txt
+!/data/cec2013
+/rl/logs
+/.ipynb_checkpoints
+.idea
+*.pyc
